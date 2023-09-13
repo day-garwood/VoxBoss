@@ -1,5 +1,5 @@
 # Contributing to VoxBoss
-First of all, thanks so much for your interest in this project. With your help, we can hopefully build something great.
+First of all, thanks so much for your interest in this project. With your help, we can hopefully build something great together.
 Whether you're looking to fix bugs, add new features, or simply correct typos, your efforts are appreciated. This document provides guidelines and instructions for contributing to the project.
 Here are some tips to get you started.
 
