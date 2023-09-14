@@ -207,6 +207,10 @@ return vbr_ok;
 
 /* Builtin handler implementations */
 
+/* Windows specific handlers */
+
+#ifdef _WIN32
+
 /* Com helpers, for those handlers that need it. */
 
 int _vb_com_initialise(_vb_com* com)
@@ -257,10 +261,6 @@ com->CoUninitialize();
 FreeLibrary(com->ole);
 return 1;
 }
-
-/* Windows specific handlers */
-
-#ifdef _WIN32
 
 /* SAPI */
 
