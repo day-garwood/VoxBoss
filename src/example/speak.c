@@ -21,6 +21,14 @@ getchar();
 free(text);
 return 0;
 }
+rc=vb_speaker_start(&s);
+if(rc!=vbr_ok)
+{
+printf("Error starting speech subsystem: %d.", rc);
+getchar();
+free(text);
+return 0;
+}
 while(1)
 {
 printf("Please enter some text.\n");
