@@ -96,6 +96,7 @@ return vbr_ok;
 void vb_speaker_cleanup(vb_speaker* voice)
 {
 if(!voice) return;
+vb_speaker_stop(voice);
 _vb_registry_cleanup(&voice->registry);
 }
 
