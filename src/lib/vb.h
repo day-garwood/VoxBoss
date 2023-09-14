@@ -47,10 +47,12 @@ vb_result;
 
 vb_result vb_config_initialise(vb_config* config, char* preference);
 vb_result vb_speaker_initialise(vb_speaker* voice, vb_config* config);
+vb_result vb_handler_register(vb_speaker* voice, char* id, vb_handler* handler);
+vb_result vb_speaker_start(vb_speaker* voice);
 vb_result vb_speak(vb_speaker* voice, char* text, int interrupt);
 vb_result vb_stop(vb_speaker* voice);
 vb_result vb_is_speaking(vb_speaker* voice);
-vb_result vb_handler_register(vb_speaker* voice, char* id, vb_handler* handler);
+vb_result vb_speaker_stop(vb_speaker* voice);
 void vb_speaker_cleanup(vb_speaker* voice);
 
 /* Internal data */

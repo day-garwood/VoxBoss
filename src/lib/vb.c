@@ -31,6 +31,33 @@ _vb_registry_reset(&voice->registry);
 vb_result rc=_vb_register_internal_handlers(voice);
 if(rc!=vbr_ok) return rc;
 voice->config=*config;
+return vbr_ok;
+}
+vb_result vb_handler_register(vb_speaker* voice, char* id, vb_handler* handler)
+{
+if(!voice) return vbr_invalid_args;
+if(!id) return vbr_invalid_args;
+if(id[0]==0) return vbr_invalid_args;
+if(_vb_find_handler_by_id(&voice->registry, id)>-1) return vbr_handler_id_taken;
+if(!_vb_handler_is_valid_id(id)) return vbr_handler_id_invalid;
+if(!handler) return vbr_invalid_args;
+if(!_vb_handler_is_usable(handler)) return vbr_handler_invalid;
+char* new=malloc(strlen(id)+1);
+if(!new) return vbr_memory;
+strcpy(new, id);
+vb_result rc=_vb_handler_prepare_registration(voice);
+if(rc!=vbr_ok)
+{
+free(new);
+return rc;
+}
+handler->id=new;
+voice->registry.handler[voice->registry.count-1]=*handler;
+return vbr_ok;
+}
+vb_result vb_speaker_start(vb_speaker* voice)
+{
+if(!voice) return vbr_invalid_args;
 return _vb_initialise_handler(voice);
 }
 vb_result vb_speak(vb_speaker* voice, char* text, int interrupt)
@@ -59,32 +86,16 @@ if(!voice->current_handler->implementation.is_speaking) return vbr_unsupported;
 if(!voice->current_handler->implementation.is_speaking(voice->current_handler)) return vbr_ok;
 return vbr_speaking;
 }
-vb_result vb_handler_register(vb_speaker* voice, char* id, vb_handler* handler)
+vb_result vb_speaker_stop(vb_speaker* voice)
 {
 if(!voice) return vbr_invalid_args;
-if(!id) return vbr_invalid_args;
-if(id[0]==0) return vbr_invalid_args;
-if(_vb_find_handler_by_id(&voice->registry, id)>-1) return vbr_handler_id_taken;
-if(!_vb_handler_is_valid_id(id)) return vbr_handler_id_invalid;
-if(!handler) return vbr_invalid_args;
-if(!_vb_handler_is_usable(handler)) return vbr_handler_invalid;
-char* new=malloc(strlen(id)+1);
-if(!new) return vbr_memory;
-strcpy(new, id);
-vb_result rc=_vb_handler_prepare_registration(voice);
-if(rc!=vbr_ok)
-{
-free(new);
-return rc;
-}
-handler->id=new;
-voice->registry.handler[voice->registry.count-1]=*handler;
+_vb_handler_cleanup(voice->current_handler);
+voice->current_handler=NULL;
 return vbr_ok;
 }
 void vb_speaker_cleanup(vb_speaker* voice)
 {
 if(!voice) return;
-_vb_handler_cleanup(voice->current_handler);
 _vb_registry_cleanup(&voice->registry);
 }
 
