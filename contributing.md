@@ -29,29 +29,33 @@ Any code that you think can improve the project will be looked at, but here are 
 * Maybe you're an expert in cross-platform development. Your contributions could improve this project by miles.
 
 To contribute code:
-1. Fork the Repository: If you're unfamiliar with forking, GitHub has a [helpful guide on this](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
-2. Create a New Branch from "dev": Using a branch-based development workflow helps keep things organized.
-3. Commit Your Changes: Aim for clear and concise commit messages detailing your changes.
-4. Test Your Changes: Please ensure that your changes don't introduce any bugs, and that they align with the purpose and scope of the project.
-5. Open a Pull Request: Provide details on the changes made and the rationale behind them.
+1. Fork the repository: If you're unfamiliar with forking, GitHub has a [helpful guide on this](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
+2. Create a new branch from "dev": Using a branch-based development workflow helps keep things organized.
+3. Commit your changes: Aim for clear commit messages detailing your changes.
+4. Test your changes: Please ensure that your changes don't introduce any bugs, and that they align with the purpose and scope of the project.
+5. Open a pull request: Provide details on the changes made and the rationale behind them.
 
 #### Core library
 Code directly involved with the library (I.E. its API or its structures) must be self-contained within the vb.c and vb.h files, and must require no external dependencies.
 
 #### Adding Handlers
 For those who wish to introduce a new handler:
-1. Add the handler as a separate C file.
-2. In your pull request, please specify whether you intend it to be a builtin handler or an extra.
-3. state the license governing the third-party speech engine.
-4. Ensure it's compatible with the VoxBoss license (zlib).
-5. Document any specific setups or requirements particular to the handler.
+1. Open a pull request, with your handlers as separate C/H files.
+
+2. In the comments:
+
+A. please specify whether you intend it to be a builtin handler or an extra.
+
+B. State the licence governing the third-party speech engine.
+
+3. Document any specific setups or requirements particular to the handler.
 
 If the handler is written for the core engine and assuming it is approved, it will be merged into the vb.c/h files as appropriate.
 
 #### Attestation
 By contributing, you attest that:
-* The contribution is your original work, or you have permissions to submit under the project's license.
-* You grant VoxBoss the right to use and distribute your contribution under the zlib license.
+* The contribution is your original work, or you have permission to submit under the project's licence.
+* You grant VoxBoss the right to use and distribute your contribution under the zlib licence.
 
 ## Feedback & Questions
 Feedback is invaluable! Should you have any questions or concerns, please remember that [help is only a click away](https://github.com/day-garwood/VoxBoss/issues).
