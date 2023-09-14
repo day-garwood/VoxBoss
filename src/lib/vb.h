@@ -150,7 +150,6 @@ vb_result _vb_sapi_register_handler(vb_speaker* voice);
 int _vb_char_is_alpha(char c);
 int _vb_char_is_digit(char c);
 int _vb_char_is_alpha_numeric(char c);
-int _vb_string_is_alpha_numeric(char* c);
 int _vb_char_is_upper(char c);
 int _vb_char_is_lower(char c);
 int _vb_strcmp(char* a, char* b, int cs);

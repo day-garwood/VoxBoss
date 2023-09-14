@@ -38,8 +38,8 @@ vb_result vb_handler_register(vb_speaker* voice, char* id, vb_handler* handler)
 if(!voice) return vbr_invalid_args;
 if(!id) return vbr_invalid_args;
 if(id[0]==0) return vbr_invalid_args;
-if(_vb_find_handler_by_id(&voice->registry, id)>-1) return vbr_handler_id_taken;
 if(!_vb_handler_is_valid_id(id)) return vbr_handler_id_invalid;
+if(_vb_find_handler_by_id(&voice->registry, id)>-1) return vbr_handler_id_taken;
 if(!handler) return vbr_invalid_args;
 if(!_vb_handler_is_usable(handler)) return vbr_handler_invalid;
 char* new=malloc(strlen(id)+1);
@@ -116,7 +116,15 @@ int _vb_handler_is_valid_id(char* id)
 {
 if(!id) return 0;
 if(id[0]==0) return 0;
-if(!_vb_string_is_alpha_numeric(id)) return 0;
+for(int x=0; x<strlen(id); x++)
+{
+if(_vb_char_is_alpha_numeric(id[x])) continue;
+char c=id[x];
+if(c==45) continue; /* dash */
+if(c==46) continue; /* dot */
+if(c==95) continue; /* underscore */
+return 0;
+}
 return 1;
 }
 void _vb_registry_cleanup(vb_registry* manager)
@@ -374,16 +382,6 @@ int _vb_char_is_alpha_numeric(char c)
 if(_vb_char_is_alpha(c)) return 1;
 if(_vb_char_is_digit(c)) return 1;
 return 0;
-}
-int _vb_string_is_alpha_numeric(char* c)
-{
-if(!c) return 0;
-if(c[0]==0) return 0;
-for(int x=0; x<strlen(c); x++)
-{
-if(!_vb_char_is_alpha_numeric(c[x])) return 0;
-}
-return 1;
 }
 int _vb_char_is_upper(char c)
 {
