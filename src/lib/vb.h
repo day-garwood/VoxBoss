@@ -45,7 +45,7 @@ vb_result;
 
 /* Functions */
 
-vb_result vb_config_initialise(vb_config* config);
+vb_result vb_config_initialise(vb_config* config, char* preference);
 vb_result vb_speaker_initialise(vb_speaker* voice, vb_config* config);
 vb_result vb_speak(vb_speaker* voice, char* text, int interrupt);
 vb_result vb_stop(vb_speaker* voice);

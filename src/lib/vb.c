@@ -4,11 +4,17 @@
 
 /* Functions */
 
-vb_result vb_config_initialise(vb_config* config)
+vb_result vb_config_initialise(vb_config* config, char* preference)
 {
 if(!config) return vbr_invalid_args;
 config->handler_preference=NULL;
 config->handler_fallback=1;
+if(!preference) return vbr_ok;
+if(preference[0]==0) return vbr_ok;
+char* prefstore=malloc(strlen(preference)+1);
+if(!prefstore) return vbr_memory;
+strcpy(prefstore, preference);
+config->handler_preference=prefstore;
 return vbr_ok;
 }
 vb_result vb_speaker_initialise(vb_speaker* voice, vb_config* config)
@@ -17,7 +23,7 @@ if(!voice) return vbr_invalid_args;
 vb_config c;
 if(!config)
 {
-vb_result rc=vb_config_initialise(&c);
+vb_result rc=vb_config_initialise(&c, NULL);
 if(rc!=vbr_ok) return rc;
 config=&c;
 }
