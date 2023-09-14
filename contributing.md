@@ -1,6 +1,8 @@
 # Contributing to VoxBoss
 First of all, thanks so much for your interest in this project. With your help, we can hopefully build something great together.
+
 Whether you're looking to fix bugs, add new features, or simply correct typos, your efforts are appreciated. This document provides guidelines and instructions for contributing to the project.
+
 Here are some tips to get you started.
 
 ### Test and Provide Feedback
@@ -20,6 +22,7 @@ Improvements to documentation will be reviewed with pleasure. New documents, suc
 
 ### Contributing code
 Code contributions are welcome.
+
 Any code that you think can improve the project will be looked at, but here are some ideas if you're looking for specifics:
 * Does it not do something that might be important? Feel free to extend the API.
 * Do you have experience with a speech engine not yet supported? Consider contributing a handler.
