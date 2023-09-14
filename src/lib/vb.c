@@ -258,6 +258,10 @@ FreeLibrary(com->ole);
 return 1;
 }
 
+/* Windows specific handlers */
+
+#ifdef _WIN32
+
 /* SAPI */
 
 int _vb_sapi_initialise(vb_handler* handler)
@@ -341,6 +345,8 @@ free(data);
 handler->data=NULL;
 }
 
+#endif
+
 /* Builtin handler registrations */
 
 vb_result _vb_register_internal_handlers(vb_speaker* voice)
@@ -351,9 +357,13 @@ vb_result rc=result;
 rc=_vb_sapi_register_handler(voice);
 return result;
 }
+
+/* Windows specific handlers */
+
 vb_result _vb_sapi_register_handler(vb_speaker* voice)
 {
 if(!voice) return vbr_invalid_args;
+#ifdef _WIN32
 vb_handler sapi;
 sapi.implementation.initialise=_vb_sapi_initialise;
 sapi.implementation.speak=_vb_sapi_speak;
@@ -361,6 +371,9 @@ sapi.implementation.stop=_vb_sapi_stop;
 sapi.implementation.is_speaking=_vb_sapi_is_speaking;
 sapi.implementation.cleanup=_vb_sapi_cleanup;
 return vb_handler_register(voice, "sapi", &sapi);
+#else
+return vbr_unsupported;
+#endif
 }
 
 /* Helper functions */

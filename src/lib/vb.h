@@ -4,8 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
 #include <windows.h>
 #include <sapi.h>
+#endif
 
 /* Public API */
 
@@ -110,6 +112,9 @@ int _vb_handler_prepare_registration(vb_speaker* voice);
 
 /* Structures */
 
+/* Windows-specific handlers */
+
+#ifdef _WIN32
 typedef struct _vb_sapi_handler _vb_sapi_handler;
 typedef struct _vb_com _vb_com;
 
@@ -139,6 +144,7 @@ int _vb_sapi_speak(vb_handler* handler, char* text, int interrupt);
 int _vb_sapi_stop(vb_handler* handler);
 int _vb_sapi_is_speaking(vb_handler* handler);
 void _vb_sapi_cleanup(vb_handler* handler);
+#endif
 
 /* Builtin handler registrations */
 
