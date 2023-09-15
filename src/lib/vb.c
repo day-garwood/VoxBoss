@@ -347,6 +347,134 @@ handler->data=NULL;
 
 #endif
 
+/* Apple-specific handlers */
+
+#ifdef __APPLE__
+
+int _vb_mac_init(vb_handler* handler)
+{
+if(!handler) return 0;
+_vb_mac_handler* data=malloc(sizeof(_vb_mac_handler));
+if(!data) return 0;
+data->foundation=dlopen("/System/Library/Frameworks/Foundation.framework/Foundation", RTLD_LOCAL);
+if(!data->foundation)
+{
+free(data);
+return 0;
+}
+data->appkit=dlopen("/System/Library/Frameworks/AppKit.framework/AppKit", RTLD_LOCAL);
+if(!data->appkit)
+{
+dlclose(data->foundation);
+free(data);
+return 0;
+}
+Class synthobj=(Class) objc_getClass("NSSpeechSynthesizer");
+if(!synthobj)
+{
+dlclose(data->appkit);
+dlclose(data->foundation);
+free(data);
+return 0;
+}
+SEL alloc_selector=sel_registerName("alloc");
+if(!alloc_selector)
+{
+dlclose(data->appkit);
+dlclose(data->foundation);
+free(data);
+return 0;
+}
+SEL init_selector=sel_registerName("init");
+if(!init_selector)
+{
+dlclose(data->appkit);
+dlclose(data->foundation);
+free(data);
+return 0;
+}
+data->voice=((id(*)(Class, SEL)) objc_msgSend)(synthobj, alloc_selector);
+if(!data->voice)
+{
+dlclose(data->appkit);
+dlclose(data->foundation);
+free(data);
+return 0;
+}
+id init_voice=((id(*)(id, SEL)) objc_msgSend)(data->voice, init_selector);
+if(!init_voice)
+{
+SEL release_selector=sel_registerName("release");
+((void(*)(id, SEL)) objc_msgSend)(data->voice, release_selector);
+data->voice=NULL;
+dlclose(data->appkit);
+dlclose(data->foundation);
+free(data);
+return 0;
+}
+data->voice=init_voice;
+handler->data=data;
+return 1;
+}
+
+int _vb_mac_speak(vb_handler* handler, char* text, int interrupt)
+{
+if(!handler) return 0;
+if(!text) return 0;
+if(text[0]==0) return 0;
+if((interrupt<0)||(interrupt>1)) return 0;
+_vb_mac_handler* data=handler->data;
+if(!data) return 0;
+if(!data->voice) return 0;
+if(interrupt) _vb_mac_stop(handler);
+Class stringobj=(Class) objc_getClass("NSString");
+if(!stringobj) return 0;
+SEL utf_selector=sel_registerName("stringWithUTF8String:");
+id wtext=((id(*)(Class, SEL, char*)) objc_msgSend)(stringobj, utf_selector);
+if(!wtext) return 0;
+SEL speak_selector=sel_registerName("startSpeakingString:");
+BOOL result=(BOOL)((id(*)(id, SEL, id)) objc_msgSend)(data->voice, speak_selector, wtext);
+return result;
+}
+
+int _vb_mac_stop(vb_handler* handler)
+{
+if(!handler) return 0;
+_vb_mac_handler* data=handler->data;
+if(!data) return 0;
+if(!data->voice) return 0;
+SEL stop_selector=sel_registerName("stopSpeaking");
+((void(*)(id, SEL)) objc_msgSend)(data->voice, stop_selector);
+return 1;
+}
+
+int _vb_mac_is_speaking(vb_handler* handler)
+{
+if(!handler) return 0;
+_vb_mac_handler* data=handler->data;
+if(!data) return 0;
+if(!data->voice) return 0;
+SEL stat_selector=sel_registerName("isSpeaking");
+BOOL result=(BOOL)((id(*)(id, SEL)) objc_msgSend)(data->voice, stat_selector);
+return result;
+}
+void _vb_mac_cleanup(vb_handler* handler)
+{
+if(!handler) return;
+_vb_mac_handler* data=handler->data;
+if(!data) return;
+if(!data->voice) return;
+SEL release_selector=sel_registerName("release");
+((void(*)(id, SEL)) objc_msgSend)(data->voice, release_selector);
+data->voice=NULL;
+dlclose(data->appkit);
+dlclose(data->foundation);
+free(data);
+handler->data=NULL;
+}
+
+#endif
+
 /* Builtin handler registrations */
 
 vb_result _vb_register_internal_handlers(vb_speaker* voice)
@@ -355,6 +483,7 @@ if(!voice) return vbr_invalid_args;
 vb_result result=vbr_ok;
 vb_result rc=result;
 rc=_vb_sapi_register_handler(voice);
+rc=_vb_mac_register_handler(voice);
 return result;
 }
 
@@ -371,6 +500,24 @@ sapi.implementation.stop=_vb_sapi_stop;
 sapi.implementation.is_speaking=_vb_sapi_is_speaking;
 sapi.implementation.cleanup=_vb_sapi_cleanup;
 return vb_handler_register(voice, "sapi", &sapi);
+#else
+return vbr_unsupported;
+#endif
+}
+
+/* Apple specific handlers. */
+
+vb_result _vb_mac_register_handler(vb_speaker* voice)
+{
+if(!voice) return vbr_invalid_args;
+#ifdef __APPLE__
+vb_handler mac;
+mac.implementation.initialise=_vb_mac_initialise;
+mac.implementation.speak=_vb_mac_speak;
+mac.implementation.stop=_vb_mac_stop;
+mac.implementation.is_speaking=_vb_mac_is_speaking;
+mac.implementation.cleanup=_vb_mac_cleanup;
+return vb_handler_register(voice, "Mac-TTS", &mac);
 #else
 return vbr_unsupported;
 #endif

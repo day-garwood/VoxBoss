@@ -9,6 +9,12 @@
 #include <sapi.h>
 #endif
 
+#ifdef __APPLE__
+#include <dlfcn.h>
+#include <objc/objc.h>
+#include <objc/message.h>
+#endif
+
 /* Public API */
 
 /* Structures */
@@ -110,11 +116,12 @@ int _vb_handler_prepare_registration(vb_speaker* voice);
 
 /* Builtin handler implementations */
 
-/* Structures */
-
 /* Windows-specific handlers */
 
 #ifdef _WIN32
+
+/* Structures */
+
 typedef struct _vb_sapi_handler _vb_sapi_handler;
 typedef struct _vb_com _vb_com;
 
@@ -135,6 +142,8 @@ ISpVoice* voice;
 WCHAR* text_to_speak;
 };
 
+/* Functions */
+
 int _vb_com_initialise(_vb_com* com);
 int _vb_com_create_instance(_vb_com* com, CLSID* clsid, IID* iid, void** data);
 int _vb_com_cleanup(_vb_com* com);
@@ -144,11 +153,40 @@ int _vb_sapi_speak(vb_handler* handler, char* text, int interrupt);
 int _vb_sapi_stop(vb_handler* handler);
 int _vb_sapi_is_speaking(vb_handler* handler);
 void _vb_sapi_cleanup(vb_handler* handler);
+
+#endif
+
+/* Apple-specific handlers */
+
+#ifdef __APPLE__
+
+/* Structures */
+
+typedef struct
+{
+void* foundation;
+void* appkit;
+id voice;
+}
+_vb_mac_handler;
+
+/* Functions */
+
+int _vb_mac_init(vb_handler* handler);
+int _vb_mac_speak(vb_handler* handler, char* text, int interrupt);
+int _vb_mac_stop(vb_handler* handler);
+int _vb_mac_is_speaking(vb_handler* handler);
+void _vb_mac_cleanup(vb_handler* handler);
+
 #endif
 
 /* Builtin handler registrations */
 
+/* We don't check platform here, that's done at the code level. */
+
 vb_result _vb_register_internal_handlers(vb_speaker* voice);
+
+vb_result _vb_mac_register_handler(vb_speaker* voice);
 vb_result _vb_sapi_register_handler(vb_speaker* voice);
 
 /* Helper functions */
