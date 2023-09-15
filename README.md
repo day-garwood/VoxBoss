@@ -6,10 +6,12 @@ VoxBoss is a budding voice abstraction library, designed to bridge the gap betwe
 Using its extendable handler system, developers can easily integrate text-to-speech functionality using their preferred speech engine, ensuring a seamless experience for the end user.
 
 ## Why VoxBoss?
-While there are numerous speech engines out there, each with its own set of features and peculiarities, integrating them into projects often requires dealing with different APIs and intricacies. VoxBoss aims to simplify that, offering a consistent interface to control any supported speech engine.
+While there are numerous speech engines out there, each with its own set of features and peculiarities, integrating them into projects often requires dealing with different APIs and intricacies. VoxBoss aims to simplify that, offering a consistent interface to control any supported speech engine on any platform.
 
 ## Current State
 VoxBoss is in its early stages. It currently has a handler for SAPI, and a proof-of-concept test that shows it in action. The goal is to make it cross-platform and extend its support to more engines, but we're not there yet.
+
+Note that there is also a handler for Mac's TTS system, but so far it remains untested.
 
 ### A Journey, Not a Destination
 Open-source projects thrive on collaboration and community contributions. Rather than waiting for a perfect "1.0" release, I've chosen to share VoxBoss with you all at this early stage, because software development is a journey, and sharing that journey can be as rewarding as reaching the destination.
@@ -24,13 +26,19 @@ There are two source files to work with in the lib folder, vb.c and vb.h. Simply
 
 To build the example, point your compiler at lib/vb.c and example/speak.c, and add lib as an include directory.
 
-This system uses runtime linking, so you shouldn't have to link with any libraries at the compilation stage.
+```shell
+gcc -o speak src/lib/vb.c src/example/speak.c -I src/lib
+```
 
-The library and its example have been tested with MinGW-W64 v12.2. It should theoretically work with other compilers as well.
+This system uses runtime linking, so you shouldn't have to link with any libraries at the compilation stage. Note that this comes at the cost of speed (I may eventually use macros so you can choose what sort of linking you want).
+
+This compiles successfully on Windows, Linux and Mac (though no speech handlers have been implemented for Linux yet).
 
 If you have written any handlers for use with the system, you will need to include those in your compiler command.
 
-Note at the moment there are no scripts to automate this, but it should be easy enough to make your own for your current setup.
+```shell
+gcc -o speak src/lib/vb.c src/lib/myhandler.c src/example/speak.c -I src/lib
+```
 
 If you have any problems, please do ask.
 
