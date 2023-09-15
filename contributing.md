@@ -6,7 +6,7 @@ Whether you're looking to fix bugs, add new features, or simply correct typos, y
 Here are some tips to get you started.
 
 ### Test and Provide Feedback
-If you've integrated VoxBoss into your project, it would be great to know how it went.
+If you've integrated VoxBoss into your project (or even if you compile and use the example), it would be great to know how it went.
 
 ### Spread the Word
 Know someone who might benefit from VoxBoss? Share this project with them.
@@ -28,18 +28,66 @@ Any code that you think can improve the project will be looked at, but here are 
 * Do you have experience with a speech engine not yet supported? Consider contributing a handler.
 * Maybe you're an expert in cross-platform development. Your contributions could improve this project by miles.
 
-To contribute code:
-1. Fork the repository: If you're unfamiliar with forking, GitHub has a [helpful guide on this](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
-2. Create a new branch from "dev": Using a branch-based development workflow helps keep things organized.
-3. Commit your changes: Aim for clear commit messages detailing your changes.
-4. Test your changes: Please ensure that your changes don't introduce any bugs, and that they align with the purpose and scope of the project.
-5. Open a pull request: Provide details on the changes made and the rationale behind them.
+To contribute code, fork the repo and open a pull request. If you're new to this process, here's a typical method for doing this:
+
+1. Fork the repository. If you're unfamiliar with forking, GitHub has a [helpful guide on this](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
+
+2. Clone:
+
+```shell
+git clone https://github.com/username/VoxBoss.git
+```
+
+Replace username with your GitHub account name.
+
+3. Add a remote so you can fetch updates:
+
+```shell
+git remote add upstream https://github.com/day-garwood/VoxBoss.git
+```
+
+4. Sync your fork with the original
+
+```shell
+cd VoxBoss
+git fetch upstream
+```
+
+5. Create a new branch from "dev".
+
+```shell
+git checkout dev
+git merge upstream/dev
+git checkout -b my-work
+```
+
+The main branch will eventually hold the stable code.
+
+6. Work and commit changes:
+
+```shell
+git add .
+git commit
+```
+
+Aim for clear commit messages detailing your changes.
+
+7. Push your changes:
+
+```shell
+git push origin my-work
+```
+
+8. Open a pull request: Provide details on the changes made and the rationale behind them.
+
+Please bear the following in mind:
 
 #### Core library
-Code directly involved with the library (I.E. its API or its structures) must be self-contained within the vb.c and vb.h files, and must require no external dependencies.
+Code directly involved with the library (I.E. its API or its structures) must be self-contained within the vb.c and vb.h files, and must require no external files or dependencies.
 
 #### Adding Handlers
 For those who wish to introduce a new handler:
+
 1. Open a pull request, with your handlers as separate C/H files.
 
 2. In the comments:
