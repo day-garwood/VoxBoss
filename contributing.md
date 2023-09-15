@@ -5,17 +5,16 @@ Whether you're looking to fix bugs, add new features, or simply correct typos, y
 
 Here are some tips to get you started.
 
-### Test and Provide Feedback
-If you've integrated VoxBoss into your project (or even if you compile and use the example), it would be great to know how it went.
-
 ### Spread the Word
 Know someone who might benefit from VoxBoss? Share this project with them.
 
 ### Suggest features
-Suggestions for features, handlers and so on are very much encouraged, especially in this early stage. Feel free to open an issue.
+If you've integrated VoxBoss into your project (or even if you compile and use the example), it would be great to know how it went.
+
+Suggestions for features, handlers and so on are very much encouraged, especially in this early stage. [Feel free to open an issue][1].
 
 ### Bug reports
-Bug squashing is fun (splat!). So please go ahead and report them. Again, feel free to open an issue.
+Bug squashing is fun (splat!). So please go ahead and report them. Again, feel free to [open an issue][1].
 
 ### Documentation
 Improvements to documentation will be reviewed with pleasure. New documents, such as tutorials, API reference etc, would also be very useful.
@@ -90,7 +89,7 @@ For those who wish to introduce a new handler:
 
 1. Open a pull request, with your handlers as separate C/H files.
 
-2. In the comments:
+2. In the PR comments:
 
 A. please specify whether you intend it to be a builtin handler or an extra.
 
@@ -106,4 +105,6 @@ By contributing, you attest that:
 * You grant VoxBoss the right to use and distribute your contribution under the zlib licence.
 
 ## Feedback & Questions
-Feedback is invaluable! Should you have any questions or concerns, please remember that [help is only a click away](https://github.com/day-garwood/VoxBoss/issues).
+Should you have any questions or concerns, please remember that [help is only a click away][1].
+
+[1]: https://github.com/day-garwood/VoxBoss/issues)
