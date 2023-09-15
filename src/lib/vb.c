@@ -216,36 +216,45 @@ return vbr_ok;
 int _vb_com_initialise(_vb_com* com)
 {
 if(!com) return 0;
-com->ole=NULL;
-com->CoInitialize=NULL;
-com->CoCreateInstance=NULL;
-com->CoUninitialize=NULL;
+_vb_com_reset(com);
 com->ole=LoadLibrary("Ole32.dll");
 if(!com->ole) return 0;
 com->CoInitialize=(HRESULT(WINAPI*)(LPVOID)) GetProcAddress(com->ole, "CoInitialize");
 if(!com->CoInitialize)
 {
 FreeLibrary(com->ole);
+_vb_com_reset(com);
 return 0;
 }
 com->CoCreateInstance=(HRESULT(WINAPI*)(REFCLSID, LPUNKNOWN, DWORD, REFIID, LPVOID*)) GetProcAddress(com->ole, "CoCreateInstance");
 if(!com->CoCreateInstance)
 {
 FreeLibrary(com->ole);
+_vb_com_reset(com);
 return 0;
 }
 com->CoUninitialize=(HRESULT(WINAPI*)(void)) GetProcAddress(com->ole, "CoUninitialize");
 if(!com->CoUninitialize)
 {
 FreeLibrary(com->ole);
+_vb_com_reset(com);
 return 0;
 }
 if(FAILED(com->CoInitialize(NULL)))
 {
 FreeLibrary(com->ole);
+_vb_com_reset(com);
 return 0;
 }
 return 1;
+}
+void _vb_com_reset(_vb_com* com)
+{
+if(!com) return;
+com->ole=NULL;
+com->CoInitialize=NULL;
+com->CoCreateInstance=NULL;
+com->CoUninitialize=NULL;
 }
 int _vb_com_create_instance(_vb_com* com, CLSID* clsid, IID* iid, void** data)
 {
@@ -254,12 +263,12 @@ HRESULT hr=com->CoCreateInstance(clsid, NULL, CLSCTX_ALL, iid, data);
 if(FAILED(hr)) return 0;
 return 1;
 }
-int _vb_com_cleanup(_vb_com* com)
+void _vb_com_cleanup(_vb_com* com)
 {
-if(!com) return 0;
+if(!com) return;
 com->CoUninitialize();
 FreeLibrary(com->ole);
-return 1;
+_vb_com_reset(com);
 }
 
 /* SAPI */
@@ -351,14 +360,65 @@ handler->data=NULL;
 
 #ifdef __APPLE__
 
+int _vb_objc_initialise(_vb_objc* objc)
+{
+if(!objc) return 0;
+_vb_objc_reset(objc);
+objc->objc=dlopen("/usr/lib/libobjc.dylib", RTLD_NOW);
+if(!objc->objc) return 0;
+objc->getClass=dlsym(objc->objc, "objc_getClass");
+if(!objc->getClass)
+{
+dlclose(objc->objc);
+_vb_objc_reset(objc);
+return 0;
+}
+objc->msgSend=dlsym(objc->objc, "objc_msgSend");
+if(!objc->msgSend)
+{
+dlclose(objc->objc);
+_vb_objc_reset(objc);
+return 0;
+}
+objc->sel_registerName=dlsym(objc->objc, "sel_registerName");
+if(!objc->sel_registerName)
+{
+dlclose(objc->objc);
+_vb_objc_reset(objc);
+return 0;
+}
+return 1;
+}
+void _vb_objc_reset(_vb_objc* objc)
+{
+if(!objc) return;
+objc->objc=NULL;
+objc->getClass=NULL;
+objc->msgSend=NULL;
+objc->sel_registerName=NULL;
+}
+void _vb_objc_cleanup(_vb_objc* objc)
+{
+if(!objc) return;
+if(!objc->objc) return;
+dlclose(objc->objc);
+_vb_objc_reset(objc);
+}
+
 int _vb_mac_initialise(vb_handler* handler)
 {
 if(!handler) return 0;
 _vb_mac_handler* data=malloc(sizeof(_vb_mac_handler));
 if(!data) return 0;
+if(!_vb_objc_initialise(&data->objc))
+{
+free(data);
+return 0;
+}
 data->foundation=dlopen("/System/Library/Frameworks/Foundation.framework/Foundation", RTLD_LOCAL);
 if(!data->foundation)
 {
+_vb_objc_cleanup(&data->objc);
 free(data);
 return 0;
 }
@@ -366,49 +426,55 @@ data->appkit=dlopen("/System/Library/Frameworks/AppKit.framework/AppKit", RTLD_L
 if(!data->appkit)
 {
 dlclose(data->foundation);
+_vb_objc_cleanup(&data->objc);
 free(data);
 return 0;
 }
-Class synthobj=(Class) objc_getClass("NSSpeechSynthesizer");
+Class synthobj=data->objc.getClass("NSSpeechSynthesizer");
 if(!synthobj)
 {
 dlclose(data->appkit);
 dlclose(data->foundation);
+_vb_objc_cleanup(&data->objc);
 free(data);
 return 0;
 }
-SEL alloc_selector=sel_registerName("alloc");
+SEL alloc_selector=data->objc.sel_registerName("alloc");
 if(!alloc_selector)
 {
 dlclose(data->appkit);
 dlclose(data->foundation);
+_vb_objc_cleanup(&data->objc);
 free(data);
 return 0;
 }
-SEL init_selector=sel_registerName("init");
+SEL init_selector=data->objc.sel_registerName("init");
 if(!init_selector)
 {
 dlclose(data->appkit);
 dlclose(data->foundation);
+_vb_objc_cleanup(&data->objc);
 free(data);
 return 0;
 }
-data->voice=((id(*)(Class, SEL)) objc_msgSend)(synthobj, alloc_selector);
+data->voice=data->objc.msgSend(synthobj, alloc_selector);
 if(!data->voice)
 {
 dlclose(data->appkit);
 dlclose(data->foundation);
+_vb_objc_cleanup(&data->objc);
 free(data);
 return 0;
 }
-id init_voice=((id(*)(id, SEL)) objc_msgSend)(data->voice, init_selector);
+id init_voice=data->objc.msgSend(data->voice, init_selector);
 if(!init_voice)
 {
-SEL release_selector=sel_registerName("release");
-((void(*)(id, SEL)) objc_msgSend)(data->voice, release_selector);
+SEL release_selector=data->objc.sel_registerName("release");
+data->objc_msgSend(data->voice, release_selector);
 data->voice=NULL;
 dlclose(data->appkit);
 dlclose(data->foundation);
+_vb_objc_cleanup(&data->objc);
 free(data);
 return 0;
 }
@@ -427,13 +493,14 @@ _vb_mac_handler* data=handler->data;
 if(!data) return 0;
 if(!data->voice) return 0;
 if(interrupt) _vb_mac_stop(handler);
-Class stringobj=(Class) objc_getClass("NSString");
+Class stringobj=data->objc.getClass("NSString");
 if(!stringobj) return 0;
-SEL utf_selector=sel_registerName("stringWithUTF8String:");
-id wtext=((id(*)(Class, SEL, char*)) objc_msgSend)(stringobj, utf_selector, text);
+SEL utf_selector=data->objc.sel_registerName("stringWithUTF8String:");
+id wtext=data->objc.msgSend(stringobj, utf_selector, text);
 if(!wtext) return 0;
-SEL speak_selector=sel_registerName("startSpeakingString:");
-BOOL result=((BOOL(*)(id, SEL, id)) objc_msgSend)(data->voice, speak_selector, wtext);
+SEL speak_selector=data->objc.sel_registerName("startSpeakingString:");
+if(!speak_selector) return 0;
+BOOL result=(BOOL) data->objc.msgSend(data->voice, speak_selector, wtext);
 return result;
 }
 
@@ -443,8 +510,9 @@ if(!handler) return 0;
 _vb_mac_handler* data=handler->data;
 if(!data) return 0;
 if(!data->voice) return 0;
-SEL stop_selector=sel_registerName("stopSpeaking");
-((void(*)(id, SEL)) objc_msgSend)(data->voice, stop_selector);
+SEL stop_selector=data->objc.sel_registerName("stopSpeaking");
+if(!stop_selector) return 0;
+data->objc.msgSend)(data->voice, stop_selector);
 return 1;
 }
 
@@ -454,8 +522,9 @@ if(!handler) return 0;
 _vb_mac_handler* data=handler->data;
 if(!data) return 0;
 if(!data->voice) return 0;
-SEL stat_selector=sel_registerName("isSpeaking");
-BOOL result=((BOOL(*)(id, SEL)) objc_msgSend)(data->voice, stat_selector);
+SEL stat_selector=data->objc.sel_registerName("isSpeaking");
+if(!stat_selector) return 0;
+BOOL result=(BOOL) objc_msgSend(data->voice, stat_selector);
 return result;
 }
 void _vb_mac_cleanup(vb_handler* handler)
@@ -464,11 +533,12 @@ if(!handler) return;
 _vb_mac_handler* data=handler->data;
 if(!data) return;
 if(!data->voice) return;
-SEL release_selector=sel_registerName("release");
-((void(*)(id, SEL)) objc_msgSend)(data->voice, release_selector);
+SEL release_selector=data->objc.sel_registerName("release");
+data->objc.msgSend)(data->voice, release_selector);
 data->voice=NULL;
 dlclose(data->appkit);
 dlclose(data->foundation);
+_vb_objc_cleanup(data->obj);
 free(data);
 handler->data=NULL;
 }

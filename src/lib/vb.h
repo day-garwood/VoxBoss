@@ -145,8 +145,9 @@ WCHAR* text_to_speak;
 /* Functions */
 
 int _vb_com_initialise(_vb_com* com);
+void _vb_com_reset(_vb_com* com);
 int _vb_com_create_instance(_vb_com* com, CLSID* clsid, IID* iid, void** data);
-int _vb_com_cleanup(_vb_com* com);
+void _vb_com_cleanup(_vb_com* com);
 
 int _vb_sapi_initialise(vb_handler* handler);
 int _vb_sapi_speak(vb_handler* handler, char* text, int interrupt);
@@ -164,6 +165,16 @@ void _vb_sapi_cleanup(vb_handler* handler);
 
 typedef struct
 {
+void* objc;
+Class (*getClass)(char* name);
+id (*msgSend)(id self, SEL op, ...);
+SEL (*sel_registerName)(char* name);
+}
+_vb_objc;
+
+typedef struct
+{
+_vb_objc objc;
 void* foundation;
 void* appkit;
 id voice;
@@ -171,6 +182,10 @@ id voice;
 _vb_mac_handler;
 
 /* Functions */
+
+int _vb_objc_initialise(_vb_objc* objc);
+void _vb_objc_reset(_vb_objc* objc);
+void _vb_objc_cleanup(_vb_objc* objc);
 
 int _vb_mac_initialise(vb_handler* handler);
 int _vb_mac_speak(vb_handler* handler, char* text, int interrupt);
