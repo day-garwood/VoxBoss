@@ -45,7 +45,7 @@ if(!_vb_handler_is_usable(handler)) return vbr_handler_invalid;
 char* new=malloc(strlen(id)+1);
 if(!new) return vbr_memory;
 strcpy(new, id);
-vb_result rc=_vb_handler_prepare_registration(voice);
+vb_result rc=_vb_handler_prepare_registration(&voice->registry);
 if(rc!=vbr_ok)
 {
 free(new);
@@ -130,10 +130,16 @@ return 1;
 void _vb_registry_cleanup(vb_registry* manager)
 {
 if(!manager) return;
+if(!manager->handler)
+{
+_vb_registry_reset(manager);
+return;
+}
 for(int x=0; x<manager->count; x++)
 {
 _vb_handler_unregister(&manager->handler[x]);
 }
+free(manager->handler);
 _vb_registry_reset(manager);
 }
 void _vb_handler_unregister(vb_handler* handler)
@@ -141,8 +147,16 @@ void _vb_handler_unregister(vb_handler* handler)
 if(!handler) return;
 if(handler->id) free(handler->id);
 handler->id=NULL;
-handler->implementation.initialise=NULL;
-handler->implementation.cleanup=NULL;
+_vb_handler_implementation_reset(&handler->implementation);
+}
+void _vb_handler_implementation_reset(vb_handler_interface* i)
+{
+if(!i) return;
+i->initialise=NULL;
+i->speak=NULL;
+i->stop=NULL;
+i->is_speaking=NULL;
+i->cleanup=NULL;
 }
 void _vb_handler_cleanup(vb_handler* handler)
 {
@@ -194,14 +208,14 @@ if(!handler->implementation.initialise) return 0;
 if(!handler->implementation.cleanup) return 0;
 return 1;
 }
-int _vb_handler_prepare_registration(vb_speaker* voice)
+vb_result _vb_handler_prepare_registration(vb_registry* registry)
 {
-if(!voice) return vbr_invalid_args;
-int c=voice->registry.count+1;
-vb_handler* handler=realloc(voice->registry.handler, sizeof(vb_handler)*c);
+if(!registry) return vbr_invalid_args;
+int c=registry->count+1;
+vb_handler* handler=realloc(registry->handler, sizeof(vb_handler)*c);
 if(!handler) return vbr_memory;
-voice->registry.handler=handler;
-voice->registry.count=c;
+registry->handler=handler;
+registry->count=c;
 return vbr_ok;
 }
 
@@ -645,26 +659,6 @@ if(c1>c2) return 1;
 if(c1==0) return 0;
 }
 return 0; /* We should theoretically never reach this point. */
-}
-int _vb_strncmp(char* a, char* b, int count, int cs)
-{
-if((a==NULL)&&(b==NULL)) return 0;
-if(!a) return -1;
-if(!b) return 1;
-
-if(cs) return strncmp(a, b, count);
-
-for(int x=0; x<count; x++)
-{
-char c1=_vb_char_to_lower(a[x]);
-char c2=_vb_char_to_lower(b[x]);
-if(c1<c2) return -1;
-if(c1>c2) return 1;
-
-/* If this far, the characters are equal, so we only need one check for NULL. */
-if(c1==0) return 0;
-}
-return 0; /* We should only reach this point if count has been exceeded. */
 }
 char _vb_char_to_lower(char x)
 {
