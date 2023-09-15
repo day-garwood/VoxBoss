@@ -471,7 +471,7 @@ _vb_objc_cleanup(&data->objc);
 free(data);
 return 0;
 }
-data->voice=data->objc.msgSend(synthobj, alloc_selector);
+data->voice=data->objc.msgSend((id) synthobj, alloc_selector);
 if(!data->voice)
 {
 dlclose(data->appkit);
@@ -484,7 +484,7 @@ id init_voice=data->objc.msgSend(data->voice, init_selector);
 if(!init_voice)
 {
 SEL release_selector=data->objc.sel_registerName("release");
-data->objc_msgSend(data->voice, release_selector);
+data->objc.msgSend(data->voice, release_selector);
 data->voice=NULL;
 dlclose(data->appkit);
 dlclose(data->foundation);
@@ -510,11 +510,11 @@ if(interrupt) _vb_mac_stop(handler);
 Class stringobj=data->objc.getClass("NSString");
 if(!stringobj) return 0;
 SEL utf_selector=data->objc.sel_registerName("stringWithUTF8String:");
-id wtext=data->objc.msgSend(stringobj, utf_selector, text);
+id wtext=data->objc.msgSend((id) stringobj, utf_selector, text);
 if(!wtext) return 0;
 SEL speak_selector=data->objc.sel_registerName("startSpeakingString:");
 if(!speak_selector) return 0;
-BOOL result=(BOOL) data->objc.msgSend(data->voice, speak_selector, wtext);
+BOOL result=(BOOL) (intptr_t) data->objc.msgSend(data->voice, speak_selector, wtext);
 return result;
 }
 
@@ -526,7 +526,7 @@ if(!data) return 0;
 if(!data->voice) return 0;
 SEL stop_selector=data->objc.sel_registerName("stopSpeaking");
 if(!stop_selector) return 0;
-data->objc.msgSend)(data->voice, stop_selector);
+data->objc.msgSend(data->voice, stop_selector);
 return 1;
 }
 
@@ -538,7 +538,7 @@ if(!data) return 0;
 if(!data->voice) return 0;
 SEL stat_selector=data->objc.sel_registerName("isSpeaking");
 if(!stat_selector) return 0;
-BOOL result=(BOOL) objc_msgSend(data->voice, stat_selector);
+BOOL result=(BOOL) (intptr_t) data->objc.msgSend(data->voice, stat_selector);
 return result;
 }
 void _vb_mac_cleanup(vb_handler* handler)
@@ -548,11 +548,11 @@ _vb_mac_handler* data=handler->data;
 if(!data) return;
 if(!data->voice) return;
 SEL release_selector=data->objc.sel_registerName("release");
-data->objc.msgSend)(data->voice, release_selector);
+data->objc.msgSend(data->voice, release_selector);
 data->voice=NULL;
 dlclose(data->appkit);
 dlclose(data->foundation);
-_vb_objc_cleanup(data->obj);
+_vb_objc_cleanup(&data->objc);
 free(data);
 handler->data=NULL;
 }
