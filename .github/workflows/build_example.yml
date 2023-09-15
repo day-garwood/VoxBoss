@@ -1,0 +1,45 @@
+name: Build Example
+on: [push]
+
+jobs:
+  build-ubuntu:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Compile
+      run: |
+        gcc -o speak src/lib/vb.c src/example/speak.c -I src/lib
+
+    - name: Change permissions
+      run: chmod +x speak
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: speak-ubuntu
+        path: speak
+
+  build-mac:
+    runs-on: macOS-latest
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Compile
+      run: |
+        gcc -o speak src/lib/vb.c src/example/speak.c -I src/lib
+
+    - name: Change permissions
+      run: chmod +x speak
+
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: speak-mac
+        path: speak
