@@ -172,7 +172,7 @@ _vb_mac_handler;
 
 /* Functions */
 
-int _vb_mac_init(vb_handler* handler);
+int _vb_mac_initialise(vb_handler* handler);
 int _vb_mac_speak(vb_handler* handler, char* text, int interrupt);
 int _vb_mac_stop(vb_handler* handler);
 int _vb_mac_is_speaking(vb_handler* handler);

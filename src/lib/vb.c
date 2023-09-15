@@ -351,7 +351,7 @@ handler->data=NULL;
 
 #ifdef __APPLE__
 
-int _vb_mac_init(vb_handler* handler)
+int _vb_mac_initialise(vb_handler* handler)
 {
 if(!handler) return 0;
 _vb_mac_handler* data=malloc(sizeof(_vb_mac_handler));
@@ -430,10 +430,10 @@ if(interrupt) _vb_mac_stop(handler);
 Class stringobj=(Class) objc_getClass("NSString");
 if(!stringobj) return 0;
 SEL utf_selector=sel_registerName("stringWithUTF8String:");
-id wtext=((id(*)(Class, SEL, char*)) objc_msgSend)(stringobj, utf_selector);
+id wtext=((id(*)(Class, SEL, char*)) objc_msgSend)(stringobj, utf_selector, text);
 if(!wtext) return 0;
 SEL speak_selector=sel_registerName("startSpeakingString:");
-BOOL result=(BOOL)((id(*)(id, SEL, id)) objc_msgSend)(data->voice, speak_selector, wtext);
+BOOL result=((BOOL(*)(id, SEL, id)) objc_msgSend)(data->voice, speak_selector, wtext);
 return result;
 }
 
@@ -455,7 +455,7 @@ _vb_mac_handler* data=handler->data;
 if(!data) return 0;
 if(!data->voice) return 0;
 SEL stat_selector=sel_registerName("isSpeaking");
-BOOL result=(BOOL)((id(*)(id, SEL)) objc_msgSend)(data->voice, stat_selector);
+BOOL result=((BOOL(*)(id, SEL)) objc_msgSend)(data->voice, stat_selector);
 return result;
 }
 void _vb_mac_cleanup(vb_handler* handler)
