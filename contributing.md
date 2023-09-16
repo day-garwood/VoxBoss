@@ -60,6 +60,8 @@ git merge upstream/dev
 git checkout -b my-work
 ```
 
+Note you may already be on dev when you clone, but it's always a good idea to double check.
+
 The main branch will eventually hold the stable code.
 
 6. Work and commit changes:
