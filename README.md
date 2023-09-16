@@ -9,6 +9,8 @@ VoxBoss is a budding voice abstraction library that is lightweight, extendable, 
 
 * And to provide as smooth an experience as possible for the user in the event of failure.
 
+Please note: The default branch is "dev". Any code you download from there may be unstable. For more stable code, please switch to the "main" branch.
+
 ## Current State
 VoxBoss is in its early prerelease stages:
 
@@ -18,9 +20,11 @@ VoxBoss is in its early prerelease stages:
 
 Things that are planned include:
 
-* API expansion: Ability to change parameters (voices, languages, pitch, rate, volume etc), more configuration (library linkage, default parameters etc)
-* Support for Linux and other platforms
-* More handlers (builtin and pluggable)
+* API expansion: Ability to change parameters (voices, languages, pitch, rate, volume etc), more configuration (library linkage, default parameters etc),
+* Support for Linux and other platforms,
+* More handlers (builtin and pluggable),
+* Possibly screen reader support (speech and braille) subject to licensing checks,
+* Possibly shared libraries for use with other languages,
 * And who knows what else.
 
 ### A Journey, Not a Destination
