@@ -76,6 +76,8 @@ int (*initialise) (vb_handler* handler);
 int (*speak) (vb_handler* handler, char* text, int interrupt);
 int (*stop) (vb_handler* handler);
 int (*is_speaking) (vb_handler* handler);
+int (*pause) (vb_handler* handler);
+int (*resume) (vb_handler* handler);
 void (*cleanup) (vb_handler* handler);
 }
 vb_handler_interface;
@@ -137,6 +139,12 @@ Initialises an appropriate handler ready for use.
 vb_result vb_speaker_start(vb_speaker* voice);
 
 /*
+Please note that the below functions are merely wrappers to call the handler's equivalent function.
+Not all functions will be supported by all handlers.
+Be sure to check for vbr_unsupported when checking your return types.
+*/
+
+/*
 vb_speak
 Speaks a string of text.
 Interrupt: 0 to queue, 1 to interrupt.
@@ -150,6 +158,20 @@ Stops speech.
 */
 
 vb_result vb_stop(vb_speaker* voice);
+
+/*
+vb_pause
+Pauses speech.
+*/
+
+vb_result vb_pause(vb_speaker* voice);
+
+/*
+vb_resume
+Resumes speech.
+*/
+
+vb_result vb_resume(vb_speaker* voice);
 
 /*
 vb_is_speaking
@@ -359,6 +381,8 @@ void _vb_com_cleanup(_vb_com* com);
 int _vb_sapi_initialise(vb_handler* handler);
 int _vb_sapi_speak(vb_handler* handler, char* text, int interrupt);
 int _vb_sapi_stop(vb_handler* handler);
+int _vb_sapi_pause(vb_handler* handler);
+int _vb_sapi_resume(vb_handler* handler);
 int _vb_sapi_is_speaking(vb_handler* handler);
 void _vb_sapi_cleanup(vb_handler* handler);
 
@@ -407,10 +431,19 @@ void _vb_objc_cleanup(_vb_objc* objc);
 int _vb_mac_initialise(vb_handler* handler);
 int _vb_mac_speak(vb_handler* handler, char* text, int interrupt);
 int _vb_mac_stop(vb_handler* handler);
+int _vb_mac_pause(vb_handler* handler);
+int _vb_mac_resume(vb_handler* handler);
 int _vb_mac_is_speaking(vb_handler* handler);
 void _vb_mac_cleanup(vb_handler* handler);
 
 #endif
+
+/* Linux-specific handlers */
+
+/*
+Todo: Find a decent speech library to integrate here.
+The key is finding one that is permissively licensed (preferably zlib or freer).
+*/
 
 /* + Builtin handler registrations */
 

@@ -78,6 +78,22 @@ if(!voice->current_handler->implementation.stop) return vbr_unsupported;
 if(!voice->current_handler->implementation.stop(voice->current_handler)) return vbr_handler_failed;
 return vbr_ok;
 }
+vb_result vb_pause(vb_speaker* voice)
+{
+if(!voice) return vbr_invalid_args;
+if(!voice->current_handler) return vbr_not_initialised;
+if(!voice->current_handler->implementation.pause) return vbr_unsupported;
+if(!voice->current_handler->implementation.pause(voice->current_handler)) return vbr_handler_failed;
+return vbr_ok;
+}
+vb_result vb_resume(vb_speaker* voice)
+{
+if(!voice) return vbr_invalid_args;
+if(!voice->current_handler) return vbr_not_initialised;
+if(!voice->current_handler->implementation.resume) return vbr_unsupported;
+if(!voice->current_handler->implementation.resume(voice->current_handler)) return vbr_handler_failed;
+return vbr_ok;
+}
 vb_result vb_is_speaking(vb_speaker* voice)
 {
 if(!voice) return vbr_invalid_args;
@@ -357,6 +373,24 @@ if(data->text_to_speak) free(data->text_to_speak);
 data->text_to_speak=NULL;
 return 1;
 }
+int _vb_sapi_pause(vb_handler* handler)
+{
+if(!handler) return 0;
+_vb_sapi_handler* data=handler->data;
+if(!data) return 0;
+HRESULT hr=data->voice->lpVtbl->Pause(data->voice);
+if(FAILED(hr)) return 0;
+return 1;
+}
+int _vb_sapi_resume(vb_handler* handler)
+{
+if(!handler) return 0;
+_vb_sapi_handler* data=handler->data;
+if(!data) return 0;
+HRESULT hr=data->voice->lpVtbl->Resume(data->voice);
+if(FAILED(hr)) return 0;
+return 1;
+}
 void _vb_sapi_cleanup(vb_handler* handler)
 {
 if(!handler) return;
@@ -530,6 +564,28 @@ data->objc.msgSend(data->voice, stop_selector);
 return 1;
 }
 
+int _vb_mac_pause(vb_handler* handler)
+{
+if(!handler) return 0;
+_vb_mac_handler* data=handler->data;
+if(!data) return 0;
+if(!data->voice) return 0;
+SEL pause_selector=data->objc.sel_registerName("pauseSpeakingAtBoundary");
+if(!pause_selector) return 0;
+data->objc.msgSend(data->voice, pause_selector, 0);
+return 1;
+}
+int _vb_mac_resume(vb_handler* handler)
+{
+if(!handler) return 0;
+_vb_mac_handler* data=handler->data;
+if(!data) return 0;
+if(!data->voice) return 0;
+SEL continue_selector=data->objc.sel_registerName("continueSpeaking");
+if(!continue_selector) return 0;
+data->objc.msgSend(data->voice, continue_selector);
+return 1;
+}
 int _vb_mac_is_speaking(vb_handler* handler)
 {
 if(!handler) return 0;
@@ -581,6 +637,8 @@ vb_handler sapi;
 sapi.implementation.initialise=_vb_sapi_initialise;
 sapi.implementation.speak=_vb_sapi_speak;
 sapi.implementation.stop=_vb_sapi_stop;
+sapi.implementation.pause=_vb_sapi_pause;
+sapi.implementation.resume=_vb_sapi_resume;
 sapi.implementation.is_speaking=_vb_sapi_is_speaking;
 sapi.implementation.cleanup=_vb_sapi_cleanup;
 return vb_handler_register(voice, "sapi", &sapi);
@@ -599,6 +657,8 @@ vb_handler mac;
 mac.implementation.initialise=_vb_mac_initialise;
 mac.implementation.speak=_vb_mac_speak;
 mac.implementation.stop=_vb_mac_stop;
+mac.implementation.pause=_vb_mac_pause;
+mac.implementation.resume=_vb_mac_resume;
 mac.implementation.is_speaking=_vb_mac_is_speaking;
 mac.implementation.cleanup=_vb_mac_cleanup;
 return vb_handler_register(voice, "Mac-TTS", &mac);
