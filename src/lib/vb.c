@@ -105,6 +105,7 @@ return vbr_speaking;
 vb_result vb_speaker_stop(vb_speaker* voice)
 {
 if(!voice) return vbr_invalid_args;
+if(!voice->current_handler) return vbr_ok;
 _vb_handler_cleanup(voice->current_handler);
 voice->current_handler=NULL;
 return vbr_ok;
