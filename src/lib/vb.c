@@ -250,8 +250,8 @@ if(!com) return 0;
 _vb_com_reset(com);
 com->ole=LoadLibrary("Ole32.dll");
 if(!com->ole) return 0;
-com->CoInitialize=(HRESULT(WINAPI*)(LPVOID)) GetProcAddress(com->ole, "CoInitialize");
-if(!com->CoInitialize)
+com->CoInitializeEx=(HRESULT(WINAPI*)(LPVOID, DWORD)) GetProcAddress(com->ole, "CoInitializeEx");
+if(!com->CoInitializeEx)
 {
 FreeLibrary(com->ole);
 _vb_com_reset(com);
@@ -271,21 +271,25 @@ FreeLibrary(com->ole);
 _vb_com_reset(com);
 return 0;
 }
-if(FAILED(com->CoInitialize(NULL)))
+HRESULT hr=com->CoInitializeEx(NULL, COINIT_MULTITHREADED);
+if(hr==S_OK)
 {
+com->autoinit=1; /* This will tell us whether we need to uninitialise. */
+return 1; /* Initialisation succeeded. */
+}
+if((hr==S_FALSE)||(hr==RPC_E_CHANGED_MODE)) return 1; /* Already initialised. */
 FreeLibrary(com->ole);
 _vb_com_reset(com);
 return 0;
-}
-return 1;
 }
 void _vb_com_reset(_vb_com* com)
 {
 if(!com) return;
 com->ole=NULL;
-com->CoInitialize=NULL;
+com->CoInitializeEx=NULL;
 com->CoCreateInstance=NULL;
 com->CoUninitialize=NULL;
+com->autoinit=0;
 }
 int _vb_com_create_instance(_vb_com* com, CLSID* clsid, IID* iid, void** data)
 {
@@ -297,7 +301,7 @@ return 1;
 void _vb_com_cleanup(_vb_com* com)
 {
 if(!com) return;
-com->CoUninitialize();
+if(com->autoinit) com->CoUninitialize();
 FreeLibrary(com->ole);
 _vb_com_reset(com);
 }

@@ -353,9 +353,10 @@ These linkers contain pointers to relevant libraries and procedures that will be
 typedef struct
 {
 HMODULE ole;
-HRESULT(WINAPI* CoInitialize)(LPVOID);
+HRESULT(WINAPI* CoInitializeEx)(LPVOID, DWORD);
 HRESULT(WINAPI* CoCreateInstance)(REFCLSID, LPUNKNOWN, DWORD, REFIID, LPVOID*);
 HRESULT(WINAPI* CoUninitialize)(void);
+int autoinit;
 }
 _vb_com;
 
